@@ -1,0 +1,19 @@
+{
+  "name": "node-api-rest-example",
+  "version": "2.0.0",
+  "dependencies": {
+    "body-parser": "^1.5.1",
+    "cors": "^2.8.1",
+    "express": "^4.7.1",
+    "method-override": "^2.1.2",
+    "mongoose": "~3.6.11"
+  },
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
