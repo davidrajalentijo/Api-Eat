@@ -111,7 +111,8 @@ findByDificultad = function(req, res) {
         Username:  req.body.username,
         Ingredientes:  req.body.ingredientes,
         Dificultad:  req.body.dificultad,
-        //Tags:  req.body.tags,
+        Descripción: req.body.descripcion,
+       Tags:  req.body.tags,
         Personas:  req.body.personas,
         Date:  req.body.date,
         Tiempo:  req.body.tiempo
@@ -137,6 +138,7 @@ res.send(receta);
         Username:  req.body.username;
         Ingredientes:  req.body.ingredientes;
         Dificultad:  req.body.dificultad;
+        Descripción: req.body.descripcion;
         //Tags:  req.body.tags;
         Personas:  req.body.personas;
         Date:  req.body.date;
