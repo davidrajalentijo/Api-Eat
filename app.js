@@ -3,34 +3,32 @@ var express = require("express"),
     app = express(),
     bodyParser  = require("body-parser"),
     methodOverride = require("method-override");
-    //var MongoClient = require('mongodb').MongoClient;
-    mongoose = require('mongoose');;
+    mongo = require('mongodb');
+    path = require('path');
+    serveStatic = require('serve-static')
+    mongoose = require('mongoose');
 var assert = require('assert');
+var multipart = require('connect-multiparty');
 
 
-app.use(bodyParser.urlencoded({ extended: false }));  
+app.use(serveStatic(path.join(__dirname, 'public')))
+app.use(bodyParser.urlencoded({ extended: false, uploadDir: __dirname + '/public/img'  }))
 app.use(bodyParser.json());  
 app.use(methodOverride());
 
-var router = express.Router();
 
-router.get('/', function(req, res) {  
-   res.send("Hello World!");
-});
+var router = express.Router();
 
 app.use(router);
 app.use(cors());
-/*
-mongoose.connect('mongodb://localhost/receipt', function(err, res) {  
-  if(err) {
-    console.log('ERROR: connecting to Database. ' + err);
-  }
-});*/
+app.use(multipart());
+
 
 routes = require('./routes/user')(app);
 routes = require('./routes/recetas')(app);
 
-mongoose.connect('mongodb://localhost/usuarios', function(err, res){
+
+var db = mongoose.connect('mongodb://localhost/usuarios', function(err, res){
   if(err){
     console.log('ERROR: connecting to database.' + err);
   }
@@ -40,9 +38,7 @@ mongoose.connect('mongodb://localhost/usuarios', function(err, res){
 });
 
 
-
-
 app.listen(3008, function() {  
-  console.log("Node server running on http://localhost:3000");
+  console.log("Node server running on http://localhost:3008");
 });
 
