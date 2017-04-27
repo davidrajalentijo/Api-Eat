@@ -242,7 +242,14 @@ fs.readFile(req.files.file.path, function (err, data) {
 
             Promise.all(promises).then(function(allData) {
                 
-                result = [].concat(...allData);
+                //result = [].concat(...allData);
+
+                //Produccion
+                    var result = allData.reduce(function(prev,curv){
+                    return prev.concat(curv)}, []);;
+
+
+
                 res.send(result);
             }).catch(function(error) {
                 res.send(error);
@@ -274,7 +281,12 @@ fs.readFile(req.files.file.path, function (err, data) {
 
             Promise.all(promises).then(function(allData) {
                 
-                result = [].concat(...allData);
+                //result = [].concat(...allData);
+
+                //Produccion
+                                var result = allData.reduce(function(prev,curv){
+                    return prev.concat(curv)}, []);;
+                                
                 res.send(result);
             }).catch(function(error) {
                 res.send(error);
