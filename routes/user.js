@@ -219,6 +219,69 @@ fs.readFile(req.files.file.path, function (err, data) {
     });
 }
 
+ getFollowing = function (req, res) {
+  User.findById(req.params.id, function (err, user) {
+        if (!user) {
+            res.send(404, 'User not found');
+        }
+        else {
+            var a = user.following;
+            var promises = a.map(function(current_value) {
+            return new Promise(function(resolve, reject) {
+            User.findById(current_value._id, function (err, users) {
+              console.log(current_value);
+            if(!err) {            
+                    resolve(users);
+
+            } else {
+                    reject(err);
+                    }
+            });
+            });
+            });
+
+            Promise.all(promises).then(function(allData) {
+                
+                result = [].concat(...allData);
+                res.send(result);
+            }).catch(function(error) {
+                res.send(error);
+            });
+        }
+  });
+};
+
+ getFollowers = function (req, res) {
+  User.findById(req.params.id, function (err, user) {
+        if (!user) {
+            res.send(404, 'User not found');
+        }
+        else {
+            var a = user.followers;
+            var promises = a.map(function(current_value) {
+            return new Promise(function(resolve, reject) {
+            User.findById(current_value._id, function (err, users) {
+              console.log(current_value);
+            if(!err) {            
+                    resolve(users);
+
+            } else {
+                    reject(err);
+                    }
+            });
+            });
+            });
+
+            Promise.all(promises).then(function(allData) {
+                
+                result = [].concat(...allData);
+                res.send(result);
+            }).catch(function(error) {
+                res.send(error);
+            });
+        }
+  });
+};
 
 
 
@@ -226,6 +289,8 @@ fs.readFile(req.files.file.path, function (err, data) {
     app.get('/user', findAllUsers);
     app.get('/user/:id', findById);
     app.get('/user/email/:email', findByEmail);
+    app.get('/user/following/:id', getFollowing);
+    app.get('/user/followers/:id', getFollowers);
     app.get('/user/username/:username', findByUsername);
     app.get('/user/recetas/:id', findUserRecetas);
     app.post('/user', addUser);

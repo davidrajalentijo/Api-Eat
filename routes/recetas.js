@@ -87,11 +87,13 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
             res.send(404, 'User not found');
         }
         else{
-        fs.readFile(req.files.file.path, function (err, data) {
-         var id = crypto.randomBytes(16).toString("hex");
-        var newPath = pwd + id +req.files.file.name;
-        fs.writeFile(newPath, data, function (err) {
+        //fs.readFile(req.files.file.path, function (err, data) {
+         //var id = crypto.randomBytes(16).toString("hex");
+        //var newPath = pwd + id +req.files.file.name;
+        //fs.writeFile(newPath, data, function (err) {
         console.log('POST - /receta');
+            var date_created = new Date();
+            var date  = date_created.toISOString().slice(0,10);
         var receta = new Receta({
         Titulo:  req.body.titulo,
         Username:  req.body.username,
@@ -100,10 +102,11 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
         Descripción: req.body.descripcion,
         Tags:  req.body.tags,
         Personas:  req.body.personas,
-        Date_Created:  req.body.date,
+        Date:  date,
+        Date_Created: date_created,
         Tiempo:  req.body.tiempo,
         user_id: req.params.id,
-        imageUrl: URL + id + req.files.file.name
+        //imageUrl: URL + id + req.files.file.name
 
         })
 
@@ -124,10 +127,11 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
                 Dificultad : receta.Dificultad,
                 Tags : receta.Tags,
                 Personas : receta.Personas,
-                Date_Created : receta.Date_Created,
+                Date:  date,
+                Date_Created: date_created,
                 Tiempo : receta.Tiempo,
                 user_id : receta.user_id,
-                imageUrl: receta.imageUrl
+                //imageUrl: receta.imageUrl
         });
 
         user.Recetas.push(UserReceta);
@@ -140,8 +144,8 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
 
         });
         res.send(receta);
-        });
-        });
+        //});
+        //});
         };
         
         });
@@ -157,7 +161,6 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
         Descripción: req.body.descripcion;
         //Tags:  req.body.tags;
         Personas:  req.body.personas;
-        Date:  req.body.date;
         Tiempo:  req.body.tiempo;
          
 //guardamos en la base de datos
@@ -190,49 +193,7 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
 }
 
 
-//POST - Insert a new Receta in the DB
-/*
-    getDashboard = function (req, res) {
-         var myarray = new Array();
-            //myarray = [];
-        User.findById(req.params.id, function(err, user){
-        if (!user){
-            res.send(404, 'User not found');
-        }
-        else{
-            
-            var a = user.following;
-            console.log(a.length);         
 
-                a.forEach(function(current_value){
-
-                     Receta.find({"user_id":current_value._id},function (err, recetas) {
-                    if(!err){
-                             
-                                  //myarray.push(receta);
-
-
-
-                             recetas.forEach(function(receta){
-                                console.log(receta);
-                                myarray.push(receta);
-
-                                });
-                           
-                             
-                            }
-                    else
-                            {
-                            console.log('Error: ' + err);
-                            }                          
-
-                });
-
-                })
-                res.send(myarray);
-        }
-        });
-        };*/
 
  getDashboard = function (req, res) {
   User.findById(req.params.id, function (err, user) {
@@ -255,9 +216,15 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
             });
 
             Promise.all(promises).then(function(allData) {
-                
-                result = [].concat(...allData);
-                res.send(result);
+
+                //Produccion
+                var result = allData.reduce(function(prev,curv){
+                    return prev.concat(curv)}, []);;
+                //result = [].concat(...allData);
+                //var sorted = result.sort(function(a,b) { 
+                return new Date(b.Date_Created).getTime() - new Date(a.Date_Created).getTime() 
+                });
+                res.send(sorted);
             }).catch(function(error) {
                 res.send(error);
             });
@@ -265,8 +232,7 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
   });
 };
 
-//58d6b8bb411cc4e115000005
-//58c188c03bf370921d000001
+
     //Link routes and functions
     app.get('/receta', findAllRecetas);
     //app.get('/recetas', orderAllRecetas);   
@@ -284,111 +250,3 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
 
 
 
-/*
-//console.log(user);
-            //console.log(user.following);
-            //console.log(user.following._id);
-            var a = user.following;
-            //console.log(a);
-            //console.log(user.Recetas);
-            var b = a.join(", ");
-            var obj = JSON.parse(a);
-            console.log(obj);
-            var myarray = new Array();
-            myarray = [];
-            myarray.push(b);
-            console.log(myarray);
-            console.log(a.join(", "));
-            console.log(Object.keys(myarray).length);
-
-
-
-
-            for (i = 0; i < Object.keys(a).length; i++) {
-                //console.log("hola");
-                //console.log(a);
-
-
-                Receta.find({"user_id":a._id},function (err, receta) {
-
-                        //console.log("estamos");
-                    if(!err){
-                             //console.log("ok");
-                             //console.log(receta);
-                             myarray.push(receta);
-                             //console.log(receta);
-                            //res.send(receta);
-                            //res.send(receta);
-                            }
-                    else
-                            {
-                            console.log('Error: ' + err);
-                            }
-
-                            //console.log(myarray);
-                            
-                    });
-
-
-
-
-
-            }
-
-            a.forEach(function(entry){
-                //console.log(entry);
-                
-                var myarray = [];
-                
-
-                    //console.log("hola");
-
-
-                      Receta.find({"user_id":entry._id},function (err, receta) {
-
-                        //console.log("estamos");
-                    if(!err){
-                             //console.log("ok");
-                             //console.log(receta);
-                             myarray.push(receta);
-                            //res.send(receta);
-                            //res.send(receta);
-                            }
-                    else
-                            {
-                            console.log('Error: ' + err);
-                            }
-
-                            //console.log(myarray);
-                            
-                    });
-
-
-
-
-                
-
-              //console.log(recetas);
-
-
-
-
-               //console.log(myarray);
-
-
-            })
-            //console.log(myarray);
-
-
-
-
-
-
-
-Promise.all(prom).then(function(allData) {
-res.send(allData);
- 
-}).catch(function(error) {
-    res.send(error);
-});
-*/

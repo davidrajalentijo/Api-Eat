@@ -20,6 +20,7 @@ var recetaSchema = new Schema({
     imageUrl: {type: String},
     Personas : { type : Number},
     Date : { type : String, format: "YYYY-MM-DD"},
+    Date_Created : { type : String},
     Tiempo : { type : String, format: "HH:mm"}
 
 
