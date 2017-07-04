@@ -221,7 +221,7 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
                 var result = allData.reduce(function(prev,curv){
                     return prev.concat(curv)}, []);;
                 //result = [].concat(...allData);
-                //var sorted = result.sort(function(a,b) { 
+                var sorted = result.sort(function(a,b) { 
                 return new Date(b.Date_Created).getTime() - new Date(a.Date_Created).getTime() 
                 });
                 res.send(sorted);

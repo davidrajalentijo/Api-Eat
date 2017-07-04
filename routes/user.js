@@ -3,6 +3,15 @@ module.exports = function (app) {
     var User = require('../models/users.js');
     var fs = require("fs");
     var crypto = require("crypto");
+    var jwt = require('jwt-simple'); 
+     var moment = require('moment');
+      var Secret = require('../config/config.js');
+      
+
+ function encrypt(user, pass) {
+        var hmac = crypto.createHmac('sha1', user).update(pass).digest('hex')
+        return hmac
+}
 
 
     findAllUsers = function (req, res) {
@@ -55,6 +64,28 @@ findByEmail = function(req, res) {
     console.log('GET /user/' + req.params.email);
         res.send(200, users)}
     });
+};
+
+    logIn = function (req, res) {
+
+        User.findOne({"Username": req.params.username}, function (err, user) {
+            if (err) throw err;
+            if (!user) {
+                res.send(404, 'No se encuentra este nombre de usuario, revise la petición');
+            } else if (user) {
+                    var Password = encrypt(user.Username, req.body.Password);
+                    if (user.Password != Password){
+                       res.send(404, 'Password error');
+                    }
+                    else{
+                    var expires = moment().add(2, 'days').valueOf();
+                    var token = jwt.encode({iss: user._id, exp: expires, username: user.Username}, Secret.TOKEN_SECRET);
+                    res.send(200, token);
+                  
+}
+
+            }
+        });
 };
 
  //POST - Insert a new User in the DB
@@ -125,10 +156,10 @@ findByEmail = function(req, res) {
 
 
 
-var URL = 'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/';
-//var URL = 'http://localhost:3008/img/';
-//var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
-var pwd = '/home/ubuntu/Api-Eat/public/img/';
+//var URL = 'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/';
+var URL = 'http://localhost:3008/img/';
+var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
+//var pwd = '/home/ubuntu/Api-Eat/public/img/';
 
      
     //POST - Insert a new User in the DB
@@ -136,10 +167,10 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
 
      
         console.log('POST - /user');
-        
+        var Password = encrypt(req.body.username, req.body.password);
         var user = new User({
         Username:  req.body.username,
-        Password:  req.body.password,
+        Password:  Password,
         Email:  req.body.email       
         })
         console.log(user);
@@ -147,12 +178,16 @@ var pwd = '/home/ubuntu/Api-Eat/public/img/';
         user.save(function(err) {
         if(!err) {
             console.log('Created');
+
         } else {
             console.log('ERROR: ' + err);
         }
     });
 
-res.send(user);
+//res.send(user);
+            var expires = moment().add(2, 'days').valueOf();
+           var token = jwt.encode({iss: user._id, exp: expires, username: user.Username}, Secret.TOKEN_SECRET);
+            res.send(200, token);
  
     };
 
@@ -160,16 +195,21 @@ res.send(user);
     addPhotoUser = function (req, res) {
 
 
-User.findById(req.params.id, function(err, user) {
+
 fs.readFile(req.files.file.path, function (err, data) {
   var id = crypto.randomBytes(16).toString("hex");
   var newPath = pwd + id +req.files.file.name;
   fs.writeFile(newPath, data, function (err) {
-    imageUrl: URL + id + req.files.file.name;
+      var a = URL + id + req.files.file.name;
+      console.log(a);
+    User.findById(req.params.id, function(err, user) {
+
+    user.imageUrl = a ;
 
     //guardamos en la base de datos
         user.save(function(err) {
             if(!err) {
+              console.log(user);
                 console.log('Updated');
             } else {
                 console.log('ERROR: ' + err);
@@ -187,12 +227,15 @@ fs.readFile(req.files.file.path, function (err, data) {
 
     //UPDATE- Actualiza los datos de un usuario
     updateUser = function(req, res) {
+
     User.findById(req.params.id, function(err, user) {
-        Username:    req.body.username;
-        Password:     req.body.password;
-        Email:  req.body.email;
+      user.Password = req.body.Password
+        //Username:    req.body.username;
+       //"Password" =     req.body.password
+        //Email:  req.body.email;
          
 //guardamos en la base de datos
+        
         user.save(function(err) {
             if(!err) {
                 console.log('Updated');
@@ -201,6 +244,10 @@ fs.readFile(req.files.file.path, function (err, data) {
             }
             res.send(user);
         });
+
+
+
+
     });
 }
 
@@ -294,7 +341,43 @@ fs.readFile(req.files.file.path, function (err, data) {
         }
   });
 };
+checkFollow = function (req, res) {
+  User.findById(req.params.id, function (err, user) {
+        if (!user) {
+            res.send(404, 'User not found');
+        }
+        else {
+        
+            var a = user.following;
 
+            var output = a.filter(function(value){ return value._id== req.params.idfollow;})
+            var promises = output.map(function(current_value) {
+              return current_value._id;
+            });
+
+            if (promises == req.params.idfollow){
+              res.send("Unfollow");
+            }
+            else{
+              res.send("Follow");
+            }
+
+
+
+        }
+  });
+};
+
+ validateToken = function(req, res){
+        console.log('Validate Token');
+        var date = Date.now();
+        var id = jwt.decode(req.params.id, Secret);
+        if(id.exp >= date){
+            res.send(200,'OK');
+        }else{
+            res.send(400,'Token Expired');
+        }
+};
 
 
     //Link routes and functions
@@ -303,13 +386,16 @@ fs.readFile(req.files.file.path, function (err, data) {
     app.get('/user/email/:email', findByEmail);
     app.get('/user/following/:id', getFollowing);
     app.get('/user/followers/:id', getFollowers);
+    app.get('/user/me/:id/following/:idfollow', checkFollow);
     app.get('/user/username/:username', findByUsername);
+    app.get('/user/login/:username', logIn);
     app.get('/user/recetas/:id', findUserRecetas);
     app.post('/user', addUser);
     app.post('/user/me/:id/follow/:idfollow', followUser);
     app.post('/user/me/:id/unfollow/:idfollow', unfollowUser);
     app.put('/user/:id', updateUser);
     app.put('/user/photo/:id', addPhotoUser);
+    app.get('/user/validate/:id', validateToken);
     app.delete('/user/:id', deleteUser);
 
     
