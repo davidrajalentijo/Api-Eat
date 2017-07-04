@@ -156,10 +156,19 @@ findByEmail = function(req, res) {
 
 
 
+
 //var URL = 'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/';
-var URL = 'http://localhost:3008/img/';
-var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
+//LOCAL
+//var URL = 'http://localhost:3008/img/';
+//var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
+
 //var pwd = '/home/ubuntu/Api-Eat/public/img/';
+
+var URL = 'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/';
+//var URL = 'http://localhost:3008/img/';
+//var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
+var pwd = '/home/ubuntu/Api-Dashboard/Api-Eat/public/';
+
 
      
     //POST - Insert a new User in the DB
@@ -192,24 +201,23 @@ var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
     };
 
     //POST - Insert a photo User in the DB
-    addPhotoUser = function (req, res) {
+addPhotoUser = function (req, res) {
 
+//console.log(req);
+console.log("segundo");
+console.log(req.body.file);
 
-
-fs.readFile(req.files.file.path, function (err, data) {
+User.findById(req.params.id, function(err, user) {
+fs.readFile(req.body.file.path, function (err, data) {
   var id = crypto.randomBytes(16).toString("hex");
-  var newPath = pwd + id +req.files.file.name;
+  var newPath = pwd + id +req.body.file.name;
+console.log(newPath);
   fs.writeFile(newPath, data, function (err) {
-      var a = URL + id + req.files.file.name;
-      console.log(a);
-    User.findById(req.params.id, function(err, user) {
-
-    user.imageUrl = a ;
+    imageUrl: URL + id + req.body.file.name;
 
     //guardamos en la base de datos
         user.save(function(err) {
             if(!err) {
-              console.log(user);
                 console.log('Updated');
             } else {
                 console.log('ERROR: ' + err);
@@ -221,6 +229,7 @@ fs.readFile(req.files.file.path, function (err, data) {
 });
 });
     };
+
 
 
 
