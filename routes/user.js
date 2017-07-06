@@ -68,12 +68,12 @@ findByEmail = function(req, res) {
 
     logIn = function (req, res) {
 
-        User.findOne({"Username": req.params.username}, function (err, user) {
+        User.findOne({"Username": req.body.username}, function (err, user) {
             if (err) throw err;
             if (!user) {
                 res.send(404, 'No se encuentra este nombre de usuario, revise la petición');
             } else if (user) {
-                    var Password = encrypt(user.Username, req.body.Password);
+                    var Password = encrypt(user.Username, req.body.password);
                     if (user.Password != Password){
                        res.send(404, 'Password error');
                     }
@@ -168,13 +168,36 @@ var URL = 'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/';
 //var URL = 'http://localhost:3008/img/';
 //var pwd = '/home/david/Escritorio/api-WhereEat/public/img/'
 var pwd = '/home/ubuntu/Api-Dashboard/Api-Eat/public/';
-
+validateEmail = (email) => {
+  console.log(email);
+  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+};
 
      
     //POST - Insert a new User in the DB
     addUser = function (req, res) {
+      console.log(req.body);
 
-     
+      if (req.body.email == '' || req.body.username == '' || req.body.password == '' || req.body.password == null || req.body.username == null || req.body.email == null ){
+        res.send(400, 'Please, complete all the fields');
+      }
+      else{
+
+         if (!this.validateEmail(req.body.email)) {
+            res.send(400, 'Email with invalid format');
+
+         }
+         else{
+
+        
+
+
+     User.findOne({Username: req.body.username}, function (err, user) {
+      if (!user) {
+
+        User.findOne({Email: req.body.email}, function (err, user) {
+           if (!user) {
         console.log('POST - /user');
         var Password = encrypt(req.body.username, req.body.password);
         var user = new User({
@@ -182,8 +205,8 @@ var pwd = '/home/ubuntu/Api-Dashboard/Api-Eat/public/';
         Password:  Password,
         Email:  req.body.email       
         })
-        console.log(user);
 
+        
         user.save(function(err) {
         if(!err) {
             console.log('Created');
@@ -193,27 +216,35 @@ var pwd = '/home/ubuntu/Api-Dashboard/Api-Eat/public/';
         }
     });
 
-//res.send(user);
-            var expires = moment().add(2, 'days').valueOf();
+          var expires = moment().add(2, 'days').valueOf();
            var token = jwt.encode({iss: user._id, exp: expires, username: user.Username}, Secret.TOKEN_SECRET);
             res.send(200, token);
- 
-    };
+          }
+          else{res.send(400, 'There is a User with this Email');
+          }
+          });
+
+}
+else{
+  res.send(400, 'There is a User with this Username');
+}
+    });
+ }
+   } };
 
     //POST - Insert a photo User in the DB
 addPhotoUser = function (req, res) {
 
-//console.log(req);
-console.log("segundo");
-console.log(req.body.file);
+
+console.log(req.files.file.originalFilename);
 
 User.findById(req.params.id, function(err, user) {
-fs.readFile(req.body.file.path, function (err, data) {
+fs.readFile(req.files.file.path, function (err, data) {
   var id = crypto.randomBytes(16).toString("hex");
-  var newPath = pwd + id +req.body.file.name;
-console.log(newPath);
+  var newPath = pwd + id +req.files.file.originalFilename;
+
   fs.writeFile(newPath, data, function (err) {
-    imageUrl: URL + id + req.body.file.name;
+    user.imageUrl= URL + id + req.files.file.originalFilename;
 
     //guardamos en la base de datos
         user.save(function(err) {
@@ -397,7 +428,7 @@ checkFollow = function (req, res) {
     app.get('/user/followers/:id', getFollowers);
     app.get('/user/me/:id/following/:idfollow', checkFollow);
     app.get('/user/username/:username', findByUsername);
-    app.get('/user/login/:username', logIn);
+    app.post('/user/login', logIn);
     app.get('/user/recetas/:id', findUserRecetas);
     app.post('/user', addUser);
     app.post('/user/me/:id/follow/:idfollow', followUser);
