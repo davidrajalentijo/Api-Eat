@@ -17,7 +17,13 @@ var Followers = new Schema({
 	_id: {type: Schema.ObjectId, ref: 'User'}
 });
 
-
+var CommentsSchema = new Schema({
+    user_id :{type: Schema.ObjectId, ref: 'User'},
+    Username : {type : String},
+    Text : { type : String},
+    receta_id : {type: Schema.ObjectId, ref: 'Receta'},
+    Date_Created : { type : String},
+});
 
 var RecetaSchema = new Schema({
 	_id: {type: Schema.ObjectId, ref: 'Recetas'},
@@ -32,7 +38,9 @@ var RecetaSchema = new Schema({
     Personas : { type : Number},
     Date : { type : String, format: "YYYY-MM-DD"},
     Date_Created : { type : String},
-    Tiempo : { type : String, format: "HH:mm"}
+    Tiempo : { type : String, format: "HH:mm"},
+    Comments: [CommentsSchema],
+     imageUrl: {type: String, default:'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/user.png'},
 
 
 });

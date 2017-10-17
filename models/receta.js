@@ -8,6 +8,28 @@ var Ingredientes = new Schema({
     Ingrediente: {type: String},
     Cantidad: {type : Number}
 });
+var IndividualRating = new Schema({
+    Rating: {type:Number,default:0}
+});
+var Ratings = new Schema({
+    Rating:{type:Number,default:0},
+    user_id :{type: Schema.ObjectId, ref: 'User'},
+    receta_id : {type: Schema.ObjectId, ref: 'Receta'},
+});
+
+
+var CommentsSchema = new Schema({
+    user_id :{type: Schema.ObjectId, ref: 'User'},
+    Username : {type : String},
+    Text : { type : String},
+    receta_id : {type: Schema.ObjectId, ref: 'Receta'},
+    Date_Created : { type : String},
+        Answers: [{
+        UserID: {type: Schema.ObjectId, ref: 'User'},
+        Username: {type: String},
+        Answer: {type: String}
+    }]
+});
 
 var recetaSchema = new Schema({
     Titulo : { type : String},
@@ -21,7 +43,11 @@ var recetaSchema = new Schema({
     Personas : { type : Number},
     Date : { type : String, format: "YYYY-MM-DD"},
     Date_Created : { type : String},
-    Tiempo : { type : String, format: "HH:mm"}
+    Tiempo : { type : String, format: "HH:mm"},
+    Ratings : {type : Number},
+    Rating : [Ratings],
+    Comments: [CommentsSchema],
+    imageUrl: {type: String, default:'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/user.png'},
 
 
 });

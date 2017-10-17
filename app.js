@@ -26,6 +26,7 @@ app.use(multipart());
 
 routes = require('./routes/user')(app);
 routes = require('./routes/recetas')(app);
+routes = require('./routes/comment')(app);
 
 
 var db = mongoose.connect('mongodb://localhost/usuarios', function(err, res){
