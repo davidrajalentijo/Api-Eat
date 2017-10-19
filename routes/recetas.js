@@ -65,6 +65,50 @@ module.exports = function (app) {
         });
     };
 
+    findCommentsByReceta = function(req, res){
+        Receta.findById(req.params.id, function(err, receta) {
+            if (err){
+                res.send(500, err.message);
+            }
+            else{
+                var array = receta.Comments;
+               var sorted = array.sort(function(a,b){
+  // Turn your strings into dates, and then subtract them
+  // to get a value that is either negative, positive, or zero.
+                return new Date(a.Date_Created) - new Date(b.Date_Created);
+                                });
+                var last = sorted.slice((sorted.length - 4), sorted.length);
+                console.log(last);
+                res.send(200, sorted);
+            }
+
+
+
+        });
+
+    };
+        getLastCommentsByReceta = function(req, res){
+            console.log("hello");
+        Receta.findById(req.params.id, function(err, receta) {
+            if (err){
+                res.send(500, err.message);
+            }
+            else{
+                var array = receta.Comments;
+               var sorted = array.sort(function(a,b){
+                return new Date(a.Date_Created) - new Date(b.Date_Created);
+                                });
+                var last = sorted.slice((sorted.length - 4), sorted.length);
+                console.log(last);
+                res.send(200, last);
+            }
+
+
+
+        });
+
+    };
+
      //GET - Return recetas inserted the DB by Tags
     findByIngredient = function(req, res) {  
         console.log('GET - /receta/ingredient');
@@ -335,6 +379,8 @@ var Ratings = new Schema({
     app.get('/receta', findAllRecetas);
     //app.get('/recetas', orderAllRecetas);   
     app.get('/receta/:id', findById);
+    app.get('/receta/comments/:id', findCommentsByReceta);
+    app.get('/receta/lastcomments/:id', getLastCommentsByReceta)
     app.get('/receta/dificultad/:dificultad', findByDificultad);
     app.get('/receta/title/title', findByTitle);
     app.get('/receta/tag/:tag', findByTag);

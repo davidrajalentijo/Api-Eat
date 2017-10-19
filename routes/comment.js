@@ -19,6 +19,22 @@ module.exports = function (app) {
 };
    //GET - Return message in the DB by ID_message
     findMessageByID = function (req, res) {
+        Receta.findOne({_id: req.params.id}, function (err, msg) {
+            if (!msg) {
+                res.send(404, "Message not found");
+            } else {
+                if (!err) {
+                    res.send(200, msg);
+                } else {
+                    res.send(500, "Mongo Error");
+                    console.log('ERROR: ' + err);
+                }
+            }
+        });
+};
+
+   //GET - Return message in the DB by ID_message
+    findCommentsByReceta = function (req, res) {
         Comment.findOne({_id: req.params.id}, function (err, msg) {
             if (!msg) {
                 res.send(404, "Message not found");
