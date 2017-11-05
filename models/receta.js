@@ -11,8 +11,8 @@ var Ingredientes = new Schema({
 var IndividualRating = new Schema({
     Rating: {type:Number,default:0}
 });
-var Ratings = new Schema({
-    Rating:{type:Number,default:0},
+    var Ratings = new Schema({
+    Rating:{type:Number},
     user_id :{type: Schema.ObjectId, ref: 'User'},
     receta_id : {type: Schema.ObjectId, ref: 'Receta'},
 });
@@ -44,8 +44,8 @@ var recetaSchema = new Schema({
     Date : { type : String, format: "YYYY-MM-DD"},
     Date_Created : { type : String},
     Tiempo : { type : String, format: "HH:mm"},
-    Ratings : {type : Number},
-    Rating : [Ratings],
+    Rating : {type : Number, default:0},
+    Ratings : [Ratings],
     Comments: [CommentsSchema],
     imageUrl: {type: String, default:'http://ec2-52-56-121-182.eu-west-2.compute.amazonaws.com:3008/user.png'},
 

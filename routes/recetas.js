@@ -2,27 +2,24 @@ module.exports = function (app) {
 
     var Receta = require('../models/receta.js');
     var User = require('../models/users.js');
-     var Rate = require('../models/rate.js');
-     var fs = require("fs");
+    var Rate = require('../models/rate.js');
+    var fs = require("fs");
     var crypto = require("crypto");
 
-    //GET - Return All the recetas inserted the DB
+    //GET - Return All the recipes inserted the DB
     findAllRecetas = function (req, res) {
-        console.log("GET - /recetas");
         Receta.find(function (err, receta) {
             if(!err){
-                res.send(receta);
+                res.send(200, receta);
             }
             else
             {
-                console.log('Error: ' + err);
+                console.log(500, err.message);
             }
         });
     };
-
-    //GET - Return ONE recetas inserted the DB
+    //GET - Return ONE recipe inserted the DB
     findById = function(req, res) {  
-        console.log('GET - /receta/ID');
         Receta.findById(req.params.id, function(err, receta) {
             if(err){ 
                 res.send(500, err.message);
@@ -62,6 +59,27 @@ module.exports = function (app) {
             res.send(500, err.message);
         }else{    
             res.send(200, receta)}
+        });
+    };
+
+        //GET - Return recetas inserted the DB by Rating
+    findByRating = function(req, res) {  
+        Receta.find(function (err, receta) {
+            if(!err){
+                //res.send(receta);
+                //las ordenamos
+
+                var a = receta.Rating;
+                console.log(a);
+                //console.log(receta);
+                var sorted = receta.sort(function(a,b){return b.Rating-a.Rating});
+                res.send(sorted);
+                //console.log(sorted);
+            }
+            else
+            {
+                console.log('Error: ' + err);
+            }
         });
     };
 
@@ -132,27 +150,26 @@ var pwd = '/home/ubuntu/Api-Comments/Api-Eat/public/';
             res.send(404, 'User not found');
         }
         else{
-            console.log(req.files);
-        fs.readFile(req.files.file.path, function (err, data) {
+        //fs.readFile(req.files.file.path, function (err, data) {
          var id = crypto.randomBytes(16).toString("hex");
-        var newPath = pwd + id +req.files.file.originalFilename;
-        fs.writeFile(newPath, data, function (err) {
+        //var newPath = pwd + id +req.files.file.originalFilename;
+        //fs.writeFile(newPath, data, function (err) {
         console.log('POST - /receta');
-            var date_created = new Date();
-            var date  = date_created.toISOString().slice(0,10);
+        var date_created = new Date();
+        var date  = date_created.toISOString().slice(0,10);
         var receta = new Receta({
         Titulo:  req.body.titulo,
         Username:  req.body.username,
         Ingredientes:  req.body.ingredientes,
         Dificultad:  req.body.dificultad,
         Descripción: req.body.descripcion,
-        Tags:  req.body.tags,
+        //Tags:  req.body.tags,
         Personas:  req.body.personas,
         Date:  date,
         Date_Created: date_created,
         Tiempo:  req.body.tiempo,
         user_id: req.params.id,
-        imageUrl: URL + id + req.files.file.originalFilename
+        //imageUrl: URL + id + req.files.file.originalFilename
 
         })
 
@@ -177,7 +194,7 @@ var pwd = '/home/ubuntu/Api-Comments/Api-Eat/public/';
                 Date_Created: date_created,
                 Tiempo : receta.Tiempo,
                 user_id : receta.user_id,
-                imageUrl: receta.imageUrl
+                //imageUrl: receta.imageUrl
         });
 
         user.Recetas.push(UserReceta);
@@ -190,8 +207,8 @@ var pwd = '/home/ubuntu/Api-Comments/Api-Eat/public/';
 
         });
         res.send(receta);
-        });
-        });
+        //});
+        //});
         };
         
         });
@@ -283,7 +300,64 @@ var pwd = '/home/ubuntu/Api-Comments/Api-Eat/public/';
     });
 }
 
+    addRating = function (req, res) {
+        Receta.findById(req.params.id, function(err, receta){
+            if(!receta){
+                res.send(404, 'Receta not found');
+            }
+            else{
+                var array = receta.Ratings
+                var rated;
+                array.forEach(function(rating){
+                    if (rating.user_id == req.body.userid){
+                        rated = "Rated";
+                        
+                }});
+                console.log(rated);
 
+                if (rated == "Rated"){
+                    res.send("Ya has puntuado anteriormente!")
+                }
+                else{
+                                    //add element in the array
+               
+                var element = {
+                        Rating: req.body.rating,
+                        user_id : req.body.userid,
+                        receta_id : req.params.id
+                };
+
+                array.push(element);
+
+                //Hemos añadido un nueva puntuacion en el array
+                //ahora tenemos que volver a calcular el rating total
+                var total = 0;
+                array.forEach(function(rating) {
+                    total += rating.Rating;
+                }); 
+                var puntuacion = total/array.length;
+                receta.Ratings = array;
+                receta.Rating = puntuacion;
+                //editamos la puntuacion total
+                //un mismo usuario no puede volver a puntuar 
+                receta.save(function(err) {
+                if(!err) {
+                console.log('Updated');
+                //res.send(200);
+                } else {
+                console.log('ERROR: ' + err);
+                }
+                res.send(200);
+                });  
+                
+                }
+
+
+
+
+            }
+        });
+    }
 
 
  getDashboard = function (req, res) {
@@ -388,8 +462,10 @@ var Ratings = new Schema({
     app.get('/receta/ingrediente/:ingrediente', findByIngredient);
     app.post('/receta/:id', addReceta);
     app.put('/receta/:iduser/edit/:idreceta', updateReceta);
-    app.post('/receta/rating/:id', Rating);
+    app.put('/receta/rating/:id', addRating);
+    //app.post('/receta/rating/:id', Rating);
     app.delete('/receta/:id', deleteReceta);
+    app.get('/ratings', findByRating);
 
 };
 

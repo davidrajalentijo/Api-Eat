@@ -19,17 +19,11 @@ module.exports = function (app) {
 };
    //GET - Return message in the DB by ID_message
     findMessageByID = function (req, res) {
-        Receta.findOne({_id: req.params.id}, function (err, msg) {
-            if (!msg) {
-                res.send(404, "Message not found");
-            } else {
-                if (!err) {
-                    res.send(200, msg);
-                } else {
-                    res.send(500, "Mongo Error");
-                    console.log('ERROR: ' + err);
-                }
-            }
+        Receta.findById(req.params.id, function(err, receta) {
+            if(err){ 
+                res.send(500, err.message);
+            }else{
+                res.send(200, receta.co)}
         });
 };
 
@@ -61,9 +55,9 @@ module.exports = function (app) {
             var date_created = new Date();
             var date  = date_created.toISOString().slice(0,10);
         var comment = new Comment({
-        user_id:  "58d7e478203964d90d000006",
-        Username:  "David",
-        Text:  "Hello",
+        user_id:  req.body.user_id,
+        Username:  req.body.username,
+        Text:  req.body.text,
         receta_id:  req.params.id,
         Date_Created: date_created,
         })
@@ -77,9 +71,9 @@ module.exports = function (app) {
         });
         
         var CommentReceta = ({
-        user_id:  "58d7e478203964d90d000006",
-        Username:  "David",
-        Text:  "Hello",
+        user_id:  req.body.user_id,
+        Username:  req.body.username,
+        Text:  req.body.text,
         receta_id:  req.params.id,
         Date_Created: date_created,
         _id: comment._id
@@ -154,6 +148,67 @@ addAnswer = function (req, res) {
     };
 
     deleteMessage = function (req, res) {
+
+    Receta.findOne({"Comments._id": req.params.id}, function(err, receta) {
+        
+            var array = receta.Comments;
+            console.log(array.length);
+            for (var i = 0; i < array.length; i++){
+                if (array[i]._id == req.params.id){
+                    array.splice(i, 1);
+                    break;
+                }
+            }
+
+            receta.Comments = array;
+            receta.save(function(err){
+            if(!err){
+                    console.log('saved');
+            }
+            else{
+                console.log('ERROR: ' + err);
+            }
+        })
+    }); 
+
+    Comment.findById(req.params.id, function(err, comment){
+        comment.remove(function(err){
+            if(!err){
+                console.log("ok");
+            }
+            else{
+                console.log(err);
+            }
+        })
+        res.send(200);
+    })        
+            //console.log(receta);
+            //res.send(receta);
+
+        //console.log(array);
+        //console.log(200);
+        //console.log(recetas._id);
+        //res.send(recetas);
+       //borramos en la base de datos
+       // var array = recetas.Comments;
+      /*
+      array.forEach(function(receta) {
+        console.log(receta);
+      /*
+      receta.remove(function(err){
+        if(!err){
+          console.log("OK");
+        }
+        else{
+          console.log("error");
+        }
+      })
+        */
+      //});
+        
+
+
+        /*
         //var id = jwt.decode(req.body.UserID, Secret);
         var user_id = "58d7e478203964d90d000006";
         User.findOne({_id: user_id}, function (err, user) {
@@ -188,7 +243,7 @@ addAnswer = function (req, res) {
                     }
                 });
             }
-        });
+        });*/
     };
 
     deleteAnswer = function (req, res) {

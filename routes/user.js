@@ -1,11 +1,12 @@
-module.exports = function (app) {
+  module.exports = function (app) {
 
     var User = require('../models/users.js');
+    var Receta = require('../models/receta.js');
     var fs = require("fs");
     var crypto = require("crypto");
     var jwt = require('jwt-simple'); 
-     var moment = require('moment');
-      var Secret = require('../config/config.js');
+    var moment = require('moment');
+    var Secret = require('../config/config.js');
       
 
  function encrypt(user, pass) {
@@ -293,7 +294,26 @@ fs.readFile(req.files.file.path, function (err, data) {
 
     //DELETE- Borra un usuario de la base de datos
     deleteUser = function(req, res) {
+      
+    Receta.find({"user_id": req.params.id}, function(err, recetas) {
+       //borramos en la base de datos
+       var array = recetas;
+      array.forEach(function(receta) {
+      receta.remove(function(err){
+        if(!err){
+          console.log("OK");
+        }
+        else{
+          console.log("error");
+        }
+      })
+      });
+        
+
+    });  
+    
     User.findById(req.params.id, function(err, user) {
+
       //borramos en la base de datos
         user.remove(function(err) {
             if(!err) {
@@ -411,7 +431,7 @@ checkFollow = function (req, res) {
  validateToken = function(req, res){
         console.log('Validate Token');
         var date = Date.now();
-        var id = jwt.decode(req.params.id, Secret);
+        var id = jwt.decode(req.params.id, Secret.TOKEN_SECRET);
         if(id.exp >= date){
             res.send(200,'OK');
         }else{
