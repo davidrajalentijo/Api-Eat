@@ -1,34 +1,28 @@
 module.exports = function (app) {
+var Receta = require('../models/receta.js');
+var User = require('../models/users.js');
+var Comment = require('../models/comments.js');
 
-    var Receta = require('../models/receta.js');
-    var User = require('../models/users.js');
-    var Comment = require('../models/comments.js');
-    findAllMessage = function (req, res) {
-        Comment.find(function (err, msg) {
-            if (!msg) {
-                res.send(404, "There are no msgs")
-            } else {
-                if (!err) {
-                    res.send(200, msg);
-                } else {
-                    res.send(500, "Mongo Error");
-                    console.log('ERROR: ' + err);
-                }
+//Return ALL the Comments
+findAllMessage = function (req, res) {
+    Comment.find(function (err, msg) {
+        if (!msg) {
+            res.send(404, "There are no msgs")
+        } 
+        else {
+            if (!err) {
+                res.send(200, msg);
+            } 
+            else {
+                res.send(500, "Mongo Error");
+                console.log('ERROR: ' + err);
             }
-        });
-};
-   //GET - Return message in the DB by ID_message
-    findMessageByID = function (req, res) {
-        Receta.findById(req.params.id, function(err, receta) {
-            if(err){ 
-                res.send(500, err.message);
-            }else{
-                res.send(200, receta.co)}
-        });
+        }
+    });
 };
 
-   //GET - Return message in the DB by ID_message
-    findCommentsByReceta = function (req, res) {
+//GET - Return message in the DB by ID_message
+findCommentsByReceta = function (req, res) {
         Comment.findOne({_id: req.params.id}, function (err, msg) {
             if (!msg) {
                 res.send(404, "Message not found");
@@ -43,59 +37,51 @@ module.exports = function (app) {
         });
 };
 
-
-    //POST - Insert a new Receta in the DB
-    addComment = function (req, res) {
-        Receta.findById(req.params.id, function(err, receta){
+//Add a Comment in a Recipe
+addComment = function (req, res) {
+    Receta.findById(req.params.id, function(err, receta){
         if (!receta){
             res.send(404, 'Receta not found');
         }
         else{
-        console.log('POST - /receta');
             var date_created = new Date();
             var date  = date_created.toISOString().slice(0,10);
-        var comment = new Comment({
-        user_id:  req.body.user_id,
-        Username:  req.body.username,
-        Text:  req.body.text,
-        receta_id:  req.params.id,
-        Date_Created: date_created,
-        })
-        console.log(comment);
-        comment.save(function(err) {
-        if(!err) {
-            console.log('Created in Comments');
-        } else {
-             res.send(500, err);
-        }
-        });
-        
-        var CommentReceta = ({
-        user_id:  req.body.user_id,
-        Username:  req.body.username,
-        Text:  req.body.text,
-        receta_id:  req.params.id,
-        Date_Created: date_created,
-        _id: comment._id
-        });
-
-        receta.Comments.push(CommentReceta);
-        receta.save(function (err){
+            var comment = new Comment({
+                user_id:  req.body.user_id,
+                Username:  req.body.username,
+                Text:  req.body.text,
+                receta_id:  req.params.id,
+                Date_Created: date_created,
+            })
+            comment.save(function(err) {
+                if(!err) {
+                    console.log('Created in Comments');
+                } 
+                else {
+                    res.send(500, err);
+                }
+            });
+            var CommentReceta = ({
+                user_id:  req.body.user_id,
+                Username:  req.body.username,
+                Text:  req.body.text,
+                receta_id:  req.params.id,
+                Date_Created: date_created,
+                _id: comment._id
+            });
+            receta.Comments.push(CommentReceta);
+            receta.save(function (err){
                if (!err) {
-                       console.log('Created in Recetas');
-                } else {
-                        res.send(500, err);
-                                }
-
-        });
-
-
-        res.send(receta);
-
+                    console.log('Created in Recetas');
+                } 
+                else {
+                    res.send(500, err);
+                }
+            });
+            res.send(receta);
         };
-        
-        });
-        };
+    });
+};
 
 addAnswer = function (req, res) {
         console.log("Hola");
@@ -298,7 +284,7 @@ addAnswer = function (req, res) {
 
     app.post('/comment/receta/:id', addComment);
      app.put('/comment/:id', addAnswer);
-    app.get('/comment/:id', findMessageByID);
+    //app.get('/comment/:id', findMessageByID);
      app.get('/comment', findAllMessage);
      app.delete('/comment/:id', deleteMessage);
 

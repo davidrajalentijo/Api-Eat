@@ -1,12 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var Tags = new Schema({
-    Tag: {type: String}
-});
 var Ingredientes = new Schema({
     Ingrediente: {type: String},
-    Cantidad: {type : Number}
+    Cantidad: {type : String}
 });
 var IndividualRating = new Schema({
     Rating: {type:Number,default:0}
@@ -38,10 +35,8 @@ var recetaSchema = new Schema({
     Descripción : { type : String},
     Ingredientes : [Ingredientes],
     Dificultad : { type : String, enum: ['Beginner', 'Initiated', 'Professional']},
-    Tags : [Tags],
     imageUrl: {type: String},
     Personas : { type : Number},
-    Date : { type : String, format: "YYYY-MM-DD"},
     Date_Created : { type : String},
     Tiempo : { type : String, format: "HH:mm"},
     Rating : {type : Number, default:0},
