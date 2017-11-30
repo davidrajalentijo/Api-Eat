@@ -11,9 +11,10 @@ var commentSchema = new Schema({
     Date_Created : { type : String},
     ParentID: {type: Schema.ObjectId},
     Answers: [{
-        UserID: {type: Schema.ObjectId, ref: 'User'},
+        user_id: {type: Schema.ObjectId, ref: 'User'},
         Username: {type: String},
-        Answer: {type: String}
+        Answer: {type: String},
+        Date_Created : { type : String},
     }]
 });
 

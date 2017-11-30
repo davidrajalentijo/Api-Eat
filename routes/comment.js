@@ -37,6 +37,26 @@ findCommentsByReceta = function (req, res) {
         });
 };
 
+findMessageByID = function(req, res) {
+    Comment.findById(req.params.id, function(err, msg) {
+        if(err){ 
+            res.send(500, err.message);
+        }
+        else{
+            res.send(msg)
+        }
+    });
+}
+getAnswers = function(req, res) {
+    Comment.findById(req.params.id, function(err, msg) {
+        if(err){ 
+            res.send(500, err.message);
+        }
+        else{
+            res.send(msg.Answers)
+        }
+    });
+}
 //Add a Comment in a Recipe
 addComment = function (req, res) {
     Receta.findById(req.params.id, function(err, receta){
@@ -84,49 +104,33 @@ addComment = function (req, res) {
 };
 
 addAnswer = function (req, res) {
-        console.log("Hola");
         var id = req.params.id;
         console.log(id);
         //var userid = jwt.decode(req.body.UserID, Secret);
         //console.log('id: ' + userid);
-        var user_id = "58d7e478203964d90d000006";
+       // var user_id = "58d7e478203964d90d000006";
         User.findOne({_id: user_id}, function (err, user) {
-            //console.log('u: ' + user);
             if (!user) {
                 res.send(404, 'User Not Found');
             } else {
-                //var race = true;
-                //var group = true;
                 Comment.findOne({_id: req.params.id}, function (err, message) {
                     if (!message) {
                         res.send(404, 'Message Not Found');
                     } else {
                         console.log(message);
                         console.log(message.Answer);
+                        var date_created = new Date();
                             var answer = ({
-                                UserID: id,
-                                Username: "David",
-                                Answer: "I just say hello fro two"
+                                user_id: req.body.user_id,
+                                Username: req.body.username,
+                                Answer: req.body.answer,
+                                Date_Created: date_created,
                             });
                             message.Answers.push(answer);
                             message.save(function (err) {
                                 if (err) res.send(500, 'Mongo Error');
                                 else res.send(200, message);
-                            })
-
-        Receta.findById(message.receta_id, function(err, receta){
-        if (!receta){
-            res.send(404, 'Receta not found');
-        }
-        else{
-
-                console.log(receta.Comments);
-                var comentario = receta.Comments;
-                comentario.findById(message.receta_id, function(err, receta){});
-
-        }});
-
-                        
+                            })                        
                     }
                 });
             }
@@ -284,9 +288,11 @@ addAnswer = function (req, res) {
 
     app.post('/comment/receta/:id', addComment);
      app.put('/comment/:id', addAnswer);
-    //app.get('/comment/:id', findMessageByID);
+    app.get('/comment/:id', findMessageByID);
+    app.get('/comment/answer/:id', getAnswers);
      app.get('/comment', findAllMessage);
      app.delete('/comment/:id', deleteMessage);
+
 
 };
 

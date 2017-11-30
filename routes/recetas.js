@@ -130,11 +130,19 @@ getUserRating = function(req, res) {
     Receta.findOne({"_id": req.params.id}, function(err, receta) {
         var array = receta.Ratings;
         var rated;
-        array.forEach(function(ratings) {
-            if (ratings.user_id == req.params.userid){
-                rated = ratings.Rating;
-            }
-        });
+        if( array.length == 0){
+            rated = 0;
+        }
+        else{
+            array.forEach(function(ratings) {
+                if (ratings.user_id == req.params.userid){
+                    rated = ratings.Rating;
+                }
+                else{
+                    rated = 0;
+                }
+            });
+        }    
         res.send(200, rated);
     })
 };
@@ -162,10 +170,10 @@ addReceta = function (req, res) {
     }
     var array = datos2.ingredientes;
     array.forEach(function(ingrediente) {
-            if (ingrediente.Ingrediente.length > 15){
+            if (ingrediente.Ingrediente.length > 20){
                 res.send(400, 'Ingredients name only can have 15 characters');
             }
-            else if (ingrediente.Cantidad.length > 10){
+            else if (ingrediente.Cantidad.length > 20){
                 res.send(400, 'Quantity only can have 10 characters');
             }
             else if (ingrediente.Ingrediente == '' || ingrediente.Ingrediente == null){
@@ -247,10 +255,10 @@ updateReceta = function(req, res) {
     }
     var array = req.body.ingredientes;
     array.forEach(function(ingrediente) {
-            if (ingrediente.Ingrediente.length > 15){
+            if (ingrediente.Ingrediente.length > 20){
                 res.send(400, 'Ingredients name only can have 15 characters');
             }
-            else if (ingrediente.Cantidad.length > 10){
+            else if (ingrediente.Cantidad.length > 20){
                 res.send(400, 'Quantity only can have 10 characters');
             }
             else if (ingrediente.Ingrediente == '' || ingrediente.Ingrediente == null){
@@ -395,7 +403,7 @@ addRating = function (req, res) {
                         else{
                             console.log(err);
                         }
-                        res.send(200);
+                        res.send(receta);
                     })
 
                 }
